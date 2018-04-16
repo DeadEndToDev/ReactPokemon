@@ -3,57 +3,49 @@ import $ from 'jquery';
 
 import './App.css';
 
-import Pokedex from './Pokedex.js';
+import PokemonViewer from './PokemonViewer.js';
 import MyPokemon from './MyPokemon.js';
+
+const MAX_POKEMON_INDEX = 151;
 
 class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            currentPokemon: null,
+            myPokemon: [],
             pokemonLoading: false,
-            pokemonLoaded: false,
-            pokemon: [],
         }
-        this.loadPokemonHandler = this.loadPokemonHandler.bind(this);
-    }
-
-    static getPokemon() {
-        const pokemon = [];
-        for (let i = 1; i <= 151; i++) {
-            $.get(`http://pokeapi.co/api/v2/pokemon/${i}/`, (response) => {
-                pokemon.push({
-                    id: i,
-                    name: response.name,
-                    imgURL: `http://pokeapi.co/media/img/${i}.png`,
-                });
-            });
-        }
-        return pokemon;
+        this.findPokemonClickHandler = this.findPokemonClickHandler.bind(this);
     }
 
     loadPokemon() {
-        Promise.all([
-            App.getPokemon(),
-        ]).then((response) => {
-            this.setState({ pokemon: response, pokemonLoading: false, pokemonLoaded: true });
+        const randomIndex = Math.floor(Math.random()*MAX_POKEMON_INDEX) + 1;
+        $.get(`http://pokeapi.co/api/v2/pokemon/${randomIndex}/`, (response) => {
+            const currentPokemon = {
+                id: randomIndex,
+                name: response.name,
+                imgURL: `https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/sprites/pokemon/${randomIndex}.png`,
+            };
+            this.setState({ currentPokemon, pokemonLoading: false });
         });
     }
 
-    loadPokemonHandler() {
-        this.setState({ pokemonLoading: true }, this.loadPokemon);
+    findPokemonClickHandler() {
+        this.setState({ pokemonLoading: true }, this.loadPokemon)
     }
 
     render() {
-        const showLoadButton = !(this.state.pokemonLoading || this.state.pokemonLoaded);
         return (
             <div className="container">
                 <h1>hello world</h1>
-                {showLoadButton &&
-                    <button onClick={this.loadPokemonHandler}>Load Pokemon</button>
-                }
+                <button
+                    onClick={this.findPokemonClickHandler}
+                    disabled={this.state.pokemonLoading}
+                >Find Pokemon</button>
                 <div className="components">
-                    <Pokedex
-                        pokemon={this.state.pokemon}
+                    <PokemonViewer
+                        pokemon={this.state.currentPokemon}
                     />
                     <MyPokemon />
                 </div>

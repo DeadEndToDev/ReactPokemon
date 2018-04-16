@@ -8,6 +8,6 @@
     display: flex;
 }
 
-.pokedex, .my-pokemon {
+.pokemon-viewer, .my-pokemon {
     width: 48%;
 }
